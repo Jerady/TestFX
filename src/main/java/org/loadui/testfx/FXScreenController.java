@@ -101,6 +101,7 @@ public class FXScreenController implements ScreenController
 		final CountDownLatch done = new CountDownLatch( 1 );
 
 		// Replace with non-JavaFX animation to not be blocked by crap in the JFX pipeline? Regular for-loop?
+		/*
 		Platform.runLater( new Runnable()
 		{
 			@Override
@@ -118,23 +119,41 @@ public class FXScreenController implements ScreenController
 				}, new KeyValue( mouseXProperty, x, Interpolator.EASE_BOTH ), new KeyValue( mouseYProperty, y,
 						Interpolator.EASE_BOTH ) ) ).playFromStart();
 			}
-		} );
+		} ); */
+
+		boolean reachedTarget = false;
+		while(!reachedTarget)
+		{
+			currentMousePosition = MouseInfo.getPointerInfo().getLocation();
+
+			int directionX = Integer.compare( (int)x, (int)currentMousePosition.getX() );
+			int directionY = Integer.compare( (int)y, (int)currentMousePosition.getY() );
+
+			if(directionX == 0 && directionY == 0)
+				reachedTarget = true;
+			else
+			{
+				robot.mouseMove( (int)currentMousePosition.getX() + directionX, (int)currentMousePosition.getY() + directionY );
+			}
+			try
+			{
+				Thread.sleep( 1 );
+			}
+			catch( InterruptedException e )
+			{
+				e.printStackTrace();
+			}
+		}
+
 
 		System.out.println("    ii");
 
-		try
-		{
-			done.await( 2, TimeUnit.SECONDS );
+			//done.await( 5, TimeUnit.SECONDS );
 			currentMousePosition = MouseInfo.getPointerInfo().getLocation();
 			robot.mouseMove( (int)currentMousePosition.getX()+1, (int)currentMousePosition.getY() );
 			System.out.println( "    iii" );
 			FXTestUtils.awaitEvents();
 			System.out.println("    iv");
-		}
-		catch( InterruptedException e )
-		{
-			throw new RuntimeException( e );
-		}
 	}
 
 	@Override
