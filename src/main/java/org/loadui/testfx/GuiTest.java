@@ -849,13 +849,17 @@ public abstract class GuiTest
 
 	public GuiTest move( Object target )
 	{
+		System.out.println("Move to " + target);
 		Point2D point = pointFor( target );
 
+		System.out.println("  a");
 		//Since moving takes time, only do it if we're not already at the desired point.
 		if( !MouseInfo.getPointerInfo().getLocation().equals( point ) )
 		{
+			System.out.println("  b");
 			move( point.getX(), point.getY() );
 		}
+		System.out.println("  c");
 		//If the target has moved while we were moving the mouse, update to the new position:
 		point = pointFor( target );
 		controller.position( point.getX(), point.getY() );

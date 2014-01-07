@@ -37,6 +37,7 @@ import java.awt.*;
 import java.awt.event.InputEvent;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 public class FXScreenController implements ScreenController
 {
@@ -65,7 +66,9 @@ public class FXScreenController implements ScreenController
 			@Override
 			public void changed( ObservableValue<? extends Number> value, Number oldNum, Number newNum )
 			{
+				System.out.print( "            Move mouse to " + mouseXProperty.intValue() + ", " + mouseYProperty.intValue() );
 				robot.mouseMove( mouseXProperty.intValue(), mouseYProperty.intValue() );
+				System.out.println("!");
 			}
 		};
 
@@ -93,18 +96,23 @@ public class FXScreenController implements ScreenController
 		mouseXProperty.set( currentMousePosition.getX() );
 		mouseYProperty.set( currentMousePosition.getY() );
 
+		System.out.println( "    i" );
+
 		final CountDownLatch done = new CountDownLatch( 1 );
 
+		// Replace with non-JavaFX animation to not be blocked by crap in the JFX pipeline? Regular for-loop?
 		Platform.runLater( new Runnable()
 		{
 			@Override
 			public void run()
 			{
+				System.out.println( "       1" );
 				new Timeline( new KeyFrame( new Duration( moveTime ), new EventHandler<ActionEvent>()
 				{
 					@Override
 					public void handle( ActionEvent arg0 )
 					{
+						System.out.println( "       2" );
 						done.countDown();
 					}
 				}, new KeyValue( mouseXProperty, x, Interpolator.EASE_BOTH ), new KeyValue( mouseYProperty, y,
@@ -112,10 +120,16 @@ public class FXScreenController implements ScreenController
 			}
 		} );
 
+		System.out.println("    ii");
+
 		try
 		{
-			done.await();
+			done.await( 2, TimeUnit.SECONDS );
+			currentMousePosition = MouseInfo.getPointerInfo().getLocation();
+			robot.mouseMove( (int)currentMousePosition.getX()+1, (int)currentMousePosition.getY() );
+			System.out.println( "    iii" );
 			FXTestUtils.awaitEvents();
+			System.out.println("    iv");
 		}
 		catch( InterruptedException e )
 		{
